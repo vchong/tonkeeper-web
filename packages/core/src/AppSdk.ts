@@ -129,6 +129,19 @@ export abstract class BaseApp implements IAppSdk {
         console.log(url);
     };
 
+    createWallet = (walletId: string, subwalletId?: string, subwallet_id?: string) => {
+        if (walletId) {
+            console.log(`walletId: ${walletId}`);
+        }
+        if (subwalletId) {
+            console.log(`subwalletId: ${subwalletId}`);
+        }
+        if (subwallet_id) {
+            console.log(`subwallet_id: ${subwallet_id}`);
+        }
+        // Add your wallet creation logic here
+    };
+
     openNft = (nft: NFT) => {
         this.uiEvents.emit('nft', { method: 'nft', id: Date.now(), params: nft });
     };
