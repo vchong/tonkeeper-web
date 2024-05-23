@@ -77,6 +77,9 @@ const findWalletAddress = async (api: APIConfig, publicKey: string) => {
                 version: findWalletVersion(activeWallet.interfaces)
             };
 
+            // Log the subwalletId and subwallet_id if they exist on the activeWallet object
+            console.log('activeWallet.address:', activeWallet.address);
+
             return wallet;
         }
     } catch (e) {
@@ -93,6 +96,10 @@ const findWalletAddress = async (api: APIConfig, publicKey: string) => {
         friendlyAddress: contact.address.toString(),
         version: WalletVersion.V4R2
     };
+
+    // !!!!!! THIS IS DA WINNER !!!!!!
+    // Log the subwalletId and subwallet_id if they exist on the contact object
+    console.log('walletId:', contact.walletId);
 
     return wallet;
 };

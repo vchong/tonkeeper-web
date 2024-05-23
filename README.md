@@ -1,3 +1,5 @@
+# 
+
 # Tonkeeper Web Monorepo
 
 Tonkeeper Web is a non-custodial crypto wallet and gateway to blockchain dApps.
@@ -23,6 +25,11 @@ yarn
 
 # Build web app
 yarn build:web
+
+cd apps/web
+npm start
+
+# USE INCOGNITO MODE!!! DISABLE blocker bf connectg on browser!!!
 ```
 
 Compressed build could be found in `/apps/web/build` once they're built.

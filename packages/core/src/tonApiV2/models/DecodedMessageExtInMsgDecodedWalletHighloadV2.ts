@@ -12,12 +12,10 @@
  * Do not edit the class manually.
  */
 
-import { mapValues } from '../runtime';
 import type { DecodedRawMessage } from './DecodedRawMessage';
 import {
     DecodedRawMessageFromJSON,
-    DecodedRawMessageFromJSONTyped,
-    DecodedRawMessageToJSON,
+    DecodedRawMessageToJSON
 } from './DecodedRawMessage';
 
 /**
@@ -64,8 +62,9 @@ export function DecodedMessageExtInMsgDecodedWalletHighloadV2FromJSONTyped(json:
     if (json == null) {
         return json;
     }
+    console.log(`${arguments.callee.name} - subwallet_id:`, json['subwallet_id']);
     return {
-        
+
         'subwalletId': json['subwallet_id'],
         'boundedQueryId': json['bounded_query_id'],
         'rawMessages': ((json['raw_messages'] as Array<any>).map(DecodedRawMessageFromJSON)),
@@ -76,8 +75,9 @@ export function DecodedMessageExtInMsgDecodedWalletHighloadV2ToJSON(value?: Deco
     if (value == null) {
         return value;
     }
+    console.log(`${arguments.callee.name} - subwalletId:`, value['subwalletId']);
     return {
-        
+
         'subwallet_id': value['subwalletId'],
         'bounded_query_id': value['boundedQueryId'],
         'raw_messages': ((value['rawMessages'] as Array<any>).map(DecodedRawMessageToJSON)),

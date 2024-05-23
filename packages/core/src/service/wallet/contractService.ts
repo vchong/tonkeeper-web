@@ -20,18 +20,29 @@ export const walletContract = (
 ) => {
     switch (version) {
         case WalletVersion.V3R1:
-            return WalletContractV3R1.create({ workchain, publicKey });
+            const contract1 = WalletContractV3R1.create({ workchain, publicKey });
+            console.log(`WalletVersion.V3R1 - workchain:`, workchain);
+            return contract1;
+        // return WalletContractV3R1.create({ workchain, publicKey });
         case WalletVersion.V3R2:
-            return WalletContractV3R2.create({ workchain, publicKey });
+            const contract2 = WalletContractV3R2.create({ workchain, publicKey });
+            console.log(`WalletVersion.V3R2 - workchain:`, workchain);
+            return contract2;
+        // return WalletContractV3R2.create({ workchain, publicKey });
         case WalletVersion.V4R1:
             throw new Error('Unsupported wallet contract version - v4R1');
         case WalletVersion.V4R2:
-            return WalletContractV4.create({ workchain, publicKey });
+            const contract4 = WalletContractV4.create({ workchain, publicKey });
+            console.log(`WalletVersion.V4 - workchain:`, workchain);
+            return contract4;
+        // return WalletContractV4.create({ workchain, publicKey });
         case WalletVersion.W5:
+            const walletId = {
+                networkGlobalId: network
+            };
+            console.log(`WalletVersion.W5`, walletId);
             return WalletContractV5.create({
-                walletId: {
-                    networkGlobalId: network
-                },
+                walletId,
                 publicKey
             });
     }
