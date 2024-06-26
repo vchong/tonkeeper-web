@@ -1,7 +1,6 @@
 import { delay } from '@tonkeeper/core/dist/utils/common';
 import { BrowserWindow, ipcMain } from 'electron';
 import isDev from 'electron-is-dev';
-import log from 'electron-log/main';
 import path from 'path';
 import { Cookie, CookieJar } from 'tough-cookie';
 import { handleBackgroundMessage } from '../electron/background';
@@ -98,8 +97,14 @@ export abstract class MainWindow {
         this.mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
             const setCookie = details.responseHeaders['set-cookie'] ?? [];
 
-            /* patch tg auth headers cors  */
-            if (details.url === 'https://oauth.telegram.org/auth/get') {
+            const patchMercuryCors = details.url.startsWith('https://api.mercuryo.io');
+            const patchTonkeeperCors = /https:\/\/(\w+\.){0,2}tonkeeper.com([?/].*)?/.test(
+                details.url
+            );
+            const patchTgCors = details.url === 'https://oauth.telegram.org/auth/get';
+
+            /* patch cors  */
+            if (patchMercuryCors || patchTonkeeperCors || patchTgCors) {
                 const corsHeader =
                     Object.keys(details.responseHeaders).find(
                         k => k.toLowerCase() === 'access-control-allow-origin'

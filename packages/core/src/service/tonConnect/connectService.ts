@@ -1,7 +1,9 @@
 import { Address, beginCell, storeStateInit } from '@ton/core';
 import { getSecureRandomBytes, keyPairFromSeed, sha256_sync } from '@ton/crypto';
 import queryString from 'query-string';
+import { AppKey } from '../../Keys';
 import { IStorage } from '../../Storage';
+import { AccountState } from '../../entries/account';
 import { TonConnectError } from '../../entries/exception';
 import { Network } from '../../entries/network';
 import {
@@ -22,17 +24,15 @@ import {
 } from '../../entries/tonConnect';
 import { WalletState } from '../../entries/wallet';
 import { walletContractFromState } from '../wallet/contractService';
-import { getCurrentWallet, getWalletState } from '../wallet/storeService';
+import { getWalletState } from '../wallet/storeService';
 import {
+    AccountConnection,
     TonConnectParams,
     disconnectAccountConnection,
     getAccountConnection,
-    saveAccountConnection,
-    AccountConnection
+    saveAccountConnection
 } from './connectionService';
 import { SessionCrypto } from './protocol';
-import { AccountState } from '../../entries/account';
-import { AppKey } from '../../Keys';
 
 export function parseTonConnect(options: { url: string }): TonConnectParams | string {
     try {
@@ -275,6 +275,7 @@ export interface ConnectProofPayload {
     domainBuffer: Buffer;
     payload: string;
     origin: string;
+    messageBuffer: Buffer;
 }
 
 export const tonConnectProofPayload = (
@@ -318,7 +319,8 @@ export const tonConnectProofPayload = (
         bufferToSign,
         domainBuffer,
         payload,
-        origin
+        origin,
+        messageBuffer
     };
 };
 
@@ -328,9 +330,13 @@ export const toTonProofItemReply = async (options: {
     signTonConnect: (bufferToSign: Buffer) => Promise<Uint8Array>;
     proof: ConnectProofPayload;
 }): Promise<TonProofItemReplySuccess> => {
+    let signHash = true;
+    if (options.wallet.auth) {
+        signHash = options.wallet.auth.kind !== 'keystone';
+    }
     const result: TonProofItemReplySuccess = {
         name: 'ton_proof',
-        proof: await toTonProofItem(options.signTonConnect, options.proof)
+        proof: await toTonProofItem(options.signTonConnect, options.proof, signHash)
     };
     return result;
 };
@@ -355,15 +361,22 @@ export const createTonProofItem = (
 export const toTonProofItem = async (
     signTonConnect: (bufferToSign: Buffer) => Promise<Uint8Array>,
     proof: ConnectProofPayload,
+    signHash: boolean = true,
     stateInit?: string
 ) => {
-    const signature = await signTonConnect(proof.bufferToSign);
+    const signature = await signTonConnect(signHash ? proof.bufferToSign : proof.messageBuffer);
     return createTonProofItem(signature, proof, stateInit);
 };
 
 export const tonDisconnectRequest = async (options: { storage: IStorage; webViewUrl: string }) => {
-    const wallet = await getCurrentWallet(options.storage);
-    await disconnectAccountConnection({ ...options, wallet });
+    const connection = await getDappConnection(options.storage, options.webViewUrl);
+    if (!connection) {
+        throw new TonConnectError(
+            'Missing connection',
+            CONNECT_EVENT_ERROR_CODES.BAD_REQUEST_ERROR
+        );
+    }
+    await disconnectAccountConnection({ ...options, wallet: connection.wallet });
 };
 
 export const saveWalletTonConnect = async (options: {
